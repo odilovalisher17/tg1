@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./Homepage.css";
-import Navbar from "../Navbar/Navbar";
-import SearchBar from "../SearchBar/SearchBar";
+// import Navbar from "../Navbar/Navbar";
+// import SearchBar from "../SearchBar/SearchBar";
 import { Container } from "react-bootstrap";
 
 const Homepage = () => {
   const [gifPlayed, setGifPlayed] = useState(false);
-  const gifRef = useRef(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
