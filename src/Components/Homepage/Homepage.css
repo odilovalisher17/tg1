@@ -1,0 +1,9 @@
+.my-homepage {
+  min-height: 100vh;
+  text-align: center;
+}
+
+.home-logo img {
+  height: 100%;
+  width: 100%;
+}

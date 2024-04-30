@@ -1,0 +1,7 @@
+.my-searchbar input {
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: grey solid 1px;
+  width: 100%;
+  font-size: 17px;
+}
