@@ -1,3 +1,7 @@
+a {
+  text-decoration: none !important;
+}
+
 .my-homepage {
   min-height: 100vh;
   text-align: center;
@@ -6,4 +10,25 @@
 .home-logo img {
   height: 100%;
   width: 100%;
+}
+
+.my-homepage-cat {
+  display: flex;
+  align-items: center;
+  background: rgb(240, 240, 240);
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 5px 0;
+}
+
+.my-homepage-cat img {
+  width: 55px;
+  height: 55px;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.my-homepage-cat div {
+  text-align: start;
+  color: #000;
 }

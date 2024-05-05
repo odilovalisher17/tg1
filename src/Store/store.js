@@ -5,6 +5,6 @@ import StatusOfSearchReducer from "./StatusOfSearchReducer";
 export const store = configureStore({
   reducer: {
     products: ProductReducer,
-    stausofsearch: StatusOfSearchReducer,
+    statusofsearch: StatusOfSearchReducer,
   },
 });
