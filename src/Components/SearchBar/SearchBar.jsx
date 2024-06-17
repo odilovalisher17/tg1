@@ -1,53 +1,103 @@
 import React, { useState, useEffect } from "react";
 import "./SearchBar.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../Navbar/Navbar";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProducts } from "../../Store/ProductReducer";
 import { updateStatusOfSearch } from "../../Store/StatusOfSearchReducer";
 import { Container, Row, Col } from "react-bootstrap";
+import { NavLink, useParams } from "react-router-dom";
+import {
+  addProduct,
+  incrementProduct,
+  decrementProduct,
+} from "../../Store/SelectedProductsReducer";
 
 const SearchBar = () => {
   const products = useSelector((state) => state.products);
   const statusofsearch = useSelector((state) => state.statusofsearch);
+  const selectedProducts = useSelector((state) => state.selectedProducts);
+
   const dispatch = useDispatch();
+  const params = useParams();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debounceTimer, setDebounceTimer] = useState(null);
+  const [allSubCat, setAllSubCat] = useState([]);
+  const [selectedSubCat, setSelectedSubCat] = useState({ id: null, index: 0 });
 
-  const fetchData = async (query) => {
-    const options = {
-      method: "GET",
-      url: "https://fakestoreapi.com/products",
-      // params: {
-      //   query: query,
-      //   page: "1",
-      //   category_id: "aps",
-      // },
-      // headers: {
-      //   "X-RapidAPI-Key": "23ea03a25cmshc0500faa19e674fp1140c4jsn9a9763290cfd",
-      //   "X-RapidAPI-Host": "real-time-amazon-data.p.rapidapi.com",
-      // },
-    };
-
+  /* eslint-disable */
+  const getAllSubCategories = async () => {
     try {
-      const response = await axios.request(options);
-      console.log(response);
-      dispatch(updateProducts({ products: response.data }));
-      dispatch(updateStatusOfSearch({ status: response.status }));
+      const data = await axios.get("http://127.0.0.1:8000/categories/");
+
+      let sortedSubCat = data.data.filter((c) => c.parent == params.id);
+      setAllSubCat(sortedSubCat);
+      return sortedSubCat;
     } catch (error) {
-      console.error(error);
-      const status = error.response ? error.response.status : "error";
-      dispatch(updateStatusOfSearch({ status: status }));
+      console.log(error);
     }
   };
 
+  const getAllProducts = async (subcat) => {
+    try {
+      const data = await axios.get("http://127.0.0.1:8000/products/");
+      let sortedProducts = data.data.filter((c) =>
+        [...subcat.map((sc) => sc.id), params.id * 1].includes(c.category)
+      );
+      // console.log([...allSubCat.map((sc) => sc.id), params.id * 1].includes(1));
+      // console.log(sortedProducts);
+      dispatch(updateProducts({ products: sortedProducts }));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // console.log(selectedSubCat);
   useEffect(() => {
-    // Cleanup on component unmount
+    const fetchData2 = async () => {
+      try {
+        const subCats = await getAllSubCategories();
+        // console.log(subCats);
+        await getAllProducts(subCats);
+      } catch (error) {}
+    };
+
+    fetchData2();
+  }, []);
+
+  /* eslint-enable */
+
+  useEffect(() => {
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
     };
   }, [debounceTimer]);
+
+  useEffect(() => {
+    if (selectedSubCat.id) {
+      getAllProducts([selectedSubCat]);
+    } else {
+      getAllProducts(allSubCat);
+    }
+  }, [selectedSubCat]);
+
+  const fetchData = async (query) => {
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:8000/products/?search=${query}`
+      );
+      console.log(response);
+      // setAllSubCat(response.data);
+      dispatch(updateProducts({ products: response.data }));
+      // dispatch(updateStatusOfSearch({ status: response.status }));
+    } catch (error) {
+      console.error(error);
+      // const status = error.response ? error.response.status : "error";
+      // dispatch(updateStatusOfSearch({ status: status }));
+    }
+  };
 
   const handleInputChange = (event) => {
     const value = event.target.value;
@@ -80,8 +130,78 @@ const SearchBar = () => {
           />
         </div>
 
+        <div className="search-bar-sub-cat">
+          {[{ title: "All" }, ...allSubCat].map((c, i) => (
+            <div
+              key={i}
+              style={{ minWidth: "12vw", textAlign: "center" }}
+              className={selectedSubCat.index === i ? "selected-sub-cat" : ""}
+              onClick={() => setSelectedSubCat({ index: i, id: c.id })}>
+              {c.title}
+            </div>
+          ))}
+        </div>
+
         <div className="all-products">
           <Row>
+            {products.map((product) => (
+              <Col xs={6} sm={6} md={6} lg={6} style={{ marginBottom: "10px" }}>
+                <div className="item-card">
+                  <img src="/image/cat.png" alt="" />
+                  <div className="item-card-title">{product.title}</div>
+                  <div className="item-card-price">${product.unit_price}</div>
+
+                  {(!selectedProducts.filter(
+                    (p) => p.details["id"] === product["id"]
+                  ).length > 0 ||
+                    selectedProducts.filter(
+                      (p) => p.details["id"] === product["id"]
+                    )[0].num === 0) && (
+                    <div>
+                      <button
+                        className="add-button"
+                        onClick={() => dispatch(addProduct(product))}>
+                        Add
+                      </button>
+                    </div>
+                  )}
+
+                  {selectedProducts.filter(
+                    (p) => p.details["id"] === product["id"]
+                  ).length > 0 &&
+                    selectedProducts.filter(
+                      (p) => p.details["id"] === product["id"]
+                    )[0].num > 0 && (
+                      <div className="buttons-container">
+                        <button
+                          className="minus-button"
+                          onClick={() => dispatch(decrementProduct(product))}>
+                          <FontAwesomeIcon
+                            icon={faMinus}
+                            style={{ fontSize: "20px" }}
+                          />
+                        </button>
+                        <span className="number-of-selected-item">
+                          {
+                            selectedProducts.filter(
+                              (p) => p.details.id === product["id"]
+                            )[0].num
+                          }
+                        </span>
+                        <button
+                          className="plus-button"
+                          onClick={() => dispatch(incrementProduct(product))}>
+                          <FontAwesomeIcon
+                            icon={faPlus}
+                            style={{ fontSize: "20px" }}
+                          />
+                        </button>
+                      </div>
+                    )}
+                </div>
+              </Col>
+            ))}
+
             {statusofsearch === 200 && products.length > 0 ? (
               products.map((product, index) => (
                 <Col
@@ -99,11 +219,15 @@ const SearchBar = () => {
                 </Col>
               ))
             ) : (
-              <div>No products have found :(</div>
+              <div></div>
             )}
           </Row>
         </div>
       </Container>
+
+      <NavLink to={"/view-order"}>
+        <div className="view-order">VIEW ORDER </div>
+      </NavLink>
     </div>
   );
 };

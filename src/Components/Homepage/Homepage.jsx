@@ -5,24 +5,15 @@ import axios from "axios";
 import { NavLink } from "react-router-dom";
 
 const Homepage = () => {
-  const [gifPlayed, setGifPlayed] = useState(false);
   const [allCategories, setAllCategories] = useState([]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setGifPlayed(true);
-    }, 3200);
-    return () => clearTimeout(timeout);
-  }, []);
 
   useEffect(() => {
     const getAllCat = async () => {
       try {
-        const data = await axios.get(
-          "https://fakestoreapi.com/products/categories"
-        );
+        const data = await axios.get("http://127.0.0.1:8000/categories/");
 
-        setAllCategories(data.data);
+        let sortedCategories = data.data.filter((c) => c.parent == null);
+        setAllCategories(sortedCategories);
       } catch (error) {}
     };
 
@@ -33,11 +24,7 @@ const Homepage = () => {
     <div className="my-homepage">
       <Container>
         <div className="home-logo">
-          {gifPlayed ? (
-            <img src="/image/logo2.png" alt="" />
-          ) : (
-            <img src="/image/logo2.gif" alt="GIF" />
-          )}
+          <img src="/image/logo.jpg" alt="" />
         </div>
 
         <div className="my-homepage-caterories">
@@ -45,11 +32,11 @@ const Homepage = () => {
             {allCategories.map((e, i) => (
               <Col key={i} xs={6} s={6} md={6} lg={6}>
                 <NavLink
-                  to={`/cat/${e}`}
+                  to={`/cat/${e.id}`}
                   className="my-homepage-cat"
                   href={/cat/i}>
                   <img src="/image/cat-image.webp" alt="" />
-                  <div>{e}</div>
+                  <div>{e.title}</div>
                 </NavLink>
               </Col>
             ))}
