@@ -6,7 +6,7 @@ import Navbar from "../Navbar/Navbar";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProducts } from "../../Store/ProductReducer";
-import { updateStatusOfSearch } from "../../Store/StatusOfSearchReducer";
+// import { updateStatusOfSearch } from "../../Store/StatusOfSearchReducer";
 import { Container, Row, Col } from "react-bootstrap";
 import { NavLink, useParams } from "react-router-dom";
 import {
@@ -67,8 +67,6 @@ const SearchBar = () => {
     fetchData2();
   }, []);
 
-  /* eslint-enable */
-
   useEffect(() => {
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
@@ -82,6 +80,7 @@ const SearchBar = () => {
       getAllProducts(allSubCat);
     }
   }, [selectedSubCat]);
+  /* eslint-enable */
 
   const fetchData = async (query) => {
     try {

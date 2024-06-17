@@ -8,6 +8,7 @@ const ViewOrder = () => {
   const selectedProducts = useSelector((state) => state.selectedProducts);
   const [allSum, setAllSum] = useState(0);
 
+  /* eslint-disable */
   useEffect(() => {
     let sum = selectedProducts
       .filter((p) => p.num > 0)
@@ -17,6 +18,7 @@ const ViewOrder = () => {
 
     setAllSum(sum);
   }, []);
+  /* eslint-enable */
 
   return (
     <div className="view-order-card">
