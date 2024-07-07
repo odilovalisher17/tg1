@@ -49,12 +49,13 @@ const ViewOrder = () => {
       await window.Telegram.WebApp.close();
     } catch (error) {
       console.log(error);
+      window.Telegram.WebApp.close();
     }
   };
 
   return (
     <div className="view-order-card">
-      <Container>
+      <Container style={{ minHeight: "92vh" }}>
         <div className="view-order-header">
           <div>Your order</div>
 
