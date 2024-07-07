@@ -19,6 +19,7 @@ const Homepage = () => {
 
     getAllCat();
   }, []);
+  console.log(allCategories);
 
   return (
     <div className="my-homepage">
@@ -35,7 +36,7 @@ const Homepage = () => {
                   to={`/cat/${e.id}`}
                   className="my-homepage-cat"
                   href={/cat/i}>
-                  <img src="/image/cat-image.webp" alt="" />
+                  <img src={e.logo} alt="" />
                   <div>{e.title}</div>
                 </NavLink>
               </Col>

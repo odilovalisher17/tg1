@@ -3,6 +3,7 @@ import "./ViewOrder.css";
 import { Container } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
+import axios from "axios";
 
 const ViewOrder = () => {
   const selectedProducts = useSelector((state) => state.selectedProducts);
@@ -13,12 +14,43 @@ const ViewOrder = () => {
     let sum = selectedProducts
       .filter((p) => p.num > 0)
       .reduce((t, cv) => {
-        return t + cv.details.unit_price.replace(",", ".") * cv.num;
+        return t + cv.details.unit_price * cv.num;
       }, 0);
 
     setAllSum(sum);
   }, []);
   /* eslint-enable */
+
+  const handleOrderPay = async () => {
+    try {
+      const userId = window.Telegram.WebApp.initDataUnsafe.user.id;
+      const cart = await axios.post(`http://127.0.0.1:8000/carts/`, {
+        telegram_id: userId,
+      });
+      console.log(cart.data.id);
+
+      async function fetchSequentially(sP, c) {
+        const promises = sP.map((item) =>
+          axios
+            .post(`http://127.0.0.1:8000/carts/${c}/items/`, {
+              product_id: item.details.id,
+              quantity: item.num,
+            })
+            .catch((error) => {
+              console.error(`Failed to fetch ${item}:`, error);
+            })
+        );
+
+        return Promise.all(promises);
+      }
+
+      await fetchSequentially(selectedProducts || [], cart.data.id);
+
+      await window.Telegram.WebApp.close();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="view-order-card">
@@ -27,9 +59,16 @@ const ViewOrder = () => {
           <div>Your order</div>
 
           <div>
-            <NavLink to={"/cat/4"}>Edit</NavLink>
+            <NavLink to={"/"}>Edit</NavLink>
           </div>
         </div>
+
+        {selectedProducts.length === 0 && (
+          <div>
+            <h5>You have not chosen a product!</h5>
+            <NavLink to={"/"}>Click here!</NavLink>
+          </div>
+        )}
 
         <div className="view-order-products">
           {selectedProducts
@@ -38,7 +77,7 @@ const ViewOrder = () => {
               <div className="view-order-product">
                 <div className="view-order-product-left">
                   <div>
-                    <img src="/image/cat.png" alt="" />
+                    <img src={s.details.image} alt="" />
                   </div>
 
                   <div>
@@ -53,18 +92,18 @@ const ViewOrder = () => {
                 </div>
 
                 <div className="view-order-product-right">
-                  ${s.details.unit_price.replace(",", ".") * s.num}
+                  ${s.details.unit_price * s.num}
                 </div>
               </div>
             ))}
         </div>
       </Container>
 
-      <div
-        className="view-order-pay"
-        onClick={() => window.Telegram.WebApp.close()}>
-        PAY <span>${allSum}</span>
-      </div>
+      {selectedProducts.length > 0 && (
+        <div className="view-order-pay" onClick={handleOrderPay}>
+          PAY <span>${allSum}</span>
+        </div>
+      )}
     </div>
   );
 };

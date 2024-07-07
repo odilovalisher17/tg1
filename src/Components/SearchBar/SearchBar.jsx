@@ -32,7 +32,8 @@ const SearchBar = () => {
   const getAllSubCategories = async () => {
     try {
       const data = await axios.get("http://127.0.0.1:8000/categories/");
-
+      console.log(data.data);
+      console.log(params);
       let sortedSubCat = data.data.filter((c) => c.parent == params.id);
       setAllSubCat(sortedSubCat);
       return sortedSubCat;
@@ -59,7 +60,6 @@ const SearchBar = () => {
     const fetchData2 = async () => {
       try {
         const subCats = await getAllSubCategories();
-        // console.log(subCats);
         await getAllProducts(subCats);
       } catch (error) {}
     };
@@ -135,7 +135,13 @@ const SearchBar = () => {
               key={i}
               style={{ minWidth: "12vw", textAlign: "center" }}
               className={selectedSubCat.index === i ? "selected-sub-cat" : ""}
-              onClick={() => setSelectedSubCat({ index: i, id: c.id })}>
+              onClick={() => {
+                if (c.title === "All") {
+                  setSelectedSubCat({ index: i, id: c.id, allSelected: true });
+                } else {
+                  setSelectedSubCat({ index: i, id: c.id, allSelected: false });
+                }
+              }}>
               {c.title}
             </div>
           ))}
@@ -146,7 +152,7 @@ const SearchBar = () => {
             {products.map((product) => (
               <Col xs={6} sm={6} md={6} lg={6} style={{ marginBottom: "10px" }}>
                 <div className="item-card">
-                  <img src="/image/cat.png" alt="" />
+                  <img src={product.image} alt="" />
                   <div className="item-card-title">{product.title}</div>
                   <div className="item-card-price">${product.unit_price}</div>
 
@@ -156,7 +162,7 @@ const SearchBar = () => {
                     selectedProducts.filter(
                       (p) => p.details["id"] === product["id"]
                     )[0].num === 0) && (
-                    <div>
+                    <div style={{ alignSelf: "flex-end" }}>
                       <button
                         className="add-button"
                         onClick={() => dispatch(addProduct(product))}>
